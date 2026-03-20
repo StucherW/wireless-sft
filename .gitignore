@@ -1,0 +1,27 @@
+# 忽略 Python 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 忽略环境与密钥
+.env
+.venv/
+env/
+venv/
+
+# 忽略数据目录
+data/raw/
+data/temp/
+data/parsed/*/
+!data/parsed/paper_mapping.json  # 唯独保留映射文件
+data/chunks/
+data/synthetic/
+data/cleaned/
+
+# 忽略模型缓存与输出
+.cache/
+outputs/
+*.safetensors
+*.bin
+*.pth
+
