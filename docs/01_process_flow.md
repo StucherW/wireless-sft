@@ -76,3 +76,14 @@
 3. **格式化输出 (Format Conversion)​**：
    - 将清洗后的数据转化为标准的 Alpaca 格式，并将 `chain_of_reasoning` 注入到 `output` 中，支持未来的 CoT（思维链）微调。
 
+## 7. 数据分流与分层抽样 (Data Splitting & Stratification)
+本模块实现了从“打分数据”到“训练/测试资产”的最终转化。
+
+1. **三路分流机制**：
+   - **Train Set (1300条)​**：裁判合格且用于 SFT 训练。
+   - **Test Set (111条)​**：裁判合格且严格隔离，用于 Baseline 评估。
+   - **Rejected Set (47条)​**：裁判不合格，存入回收站用于幻觉模式分析。
+2. **分层抽样 (Stratified Sampling)​**：
+   - 按照 Difficulty (L2-L5) 进行比例抽样（8%），确保测试集涵盖从基础原理到复杂推导的全量程。
+3. **推理链注入**：
+   - 采用 `<think>` 标签封装 `chain_of_reasoning`，对齐最新推理模型（Reasoning Model）的训练范式。

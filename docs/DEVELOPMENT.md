@@ -136,13 +136,14 @@
 ### Sub-task 4.2：LLM-as-a-Judge 与格式化
 - [√] 幻觉检测：实现 GPT-4o 裁判机制，生成 `hallucination_report.md`。
 - [√] 格式转换：生成带 `<think>` 标签的 `sft_alpaca_dataset.json`。
+- [√] 数据分流：完成 Train (1300) / Test (111) / Rejected (47) 的科学划分。
 
 ---
 
 ## 🚧 Phase 5：微调与评估（Fine-tuning & Evaluation）
 **目标**：验证数据价值，完成模型闭环
 **当前状态：⬅️ 即将开始**
+- [ ] Sub-task 5.1：本地 Baseline 评估 (Qwen2.5-7B-Instruct 摸底考试)
+- [ ] Sub-task 5.2：QLoRA 微调环境搭建 (针对 8G 显存优化)
+- [ ] Sub-task 5.3：模型对比测试与报告生成
 
-- [ ] 环境准备：配置 LLaMA-Factory / QLoRA
-- [ ] 模型训练：基于 1458 条黄金数据进行 SFT
-- [ ] 自动化评估：基线对比与专业维度测试

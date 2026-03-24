@@ -18,6 +18,7 @@ data/chunks/
 data/synthetic/
 data/cleaned/
 data/qa_generation/
+data/qa_dataset
 
 # 忽略模型缓存与输出
 .cache/
