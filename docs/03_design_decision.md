@@ -42,3 +42,19 @@ MinerU 单次解析会产生约 20-50MB 的中间 JSON 和 Layout PDF。
 **决策**：将所有被规则（黑名单、过短、过长）拦截的 Chunk 及其被丢弃的原因（`drop_reason`）写入单独的日志文件。
 **考量**：
 **数据清洗不能是黑盒**。我们必须知道丢弃了什么数据，才能动态调整阈值（如 `MIN_CHUNK_LENGTH`）。如果发现大量有价值的公式因为长度不足被误杀，或者有用的附录被黑名单误伤，开发者可以通过查看 `dropped_chunks.jsonl` 迅速定位问题并调整策略，这也是“工程优先于 Demo”原则的体现。
+
+## 8. 为什么使用 Pydantic + Structured Output？
+**决策**：放弃使用正则提取 Markdown 中的 ```json 代码块，转而使用 LangChain 的 `with_structured_output` 绑定 Pydantic 模型。
+**考量**：
+1. 彻底消灭 JSON 格式残缺问题。
+2. 完美解决 LaTeX 转义灾难：传统的文本生成极易吃掉反斜杠（将 `\alpha` 变成 `alpha`），而 Structured Output 在底层 API 层面保证了转义符的完整性，保护了无线感知领域的数学公式。
+
+## 9. 为什么引入思维链 (Chain of Reasoning) 和难度分级？
+**决策**：在 Schema 中强制大模型在输出 QA 前，先输出一段内部推理（CoT），并为问题打分（1-5）。
+**考量**：
+对于硬核的物理原理和公式推导，如果让模型直接给出 Answer，极易产生逻辑跳跃和幻觉。强制其先“打草稿”梳理上下文，能极大提升最终 Answer 的严谨性。难度分级则为未来微调时的“课程学习（Curriculum Learning）”或数据配比提供了筛选维度。
+
+## 10. 为什么 Schema 描述和 Prompt 全部采用纯英文？
+**决策**：即使未来可能需要中文辅助，当前阶段的所有系统指令、字段描述（`description`）全部使用学术英语。
+**考量**：
+无线感知领域的专有名词（如 CSI, OFDM, Multipath Mitigation）在英文语境下语义最精确。全英文的约束能防止大模型在生成 JSON 时产生中英夹杂的混乱分布，确保最终获得的 SFT 数据集具备纯正的国际顶会学术英语质感。

@@ -43,3 +43,21 @@
    - 高质量数据写入 `data/chunks/chunks.jsonl`。
    - 被丢弃的碎片和无效章节写入 `dropped_chunks.jsonl`，并附带 `drop_reason` 供人工抽查。
 
+## 5. 数据合成引擎 (QA Generation) 工作流
+本模块承接 Phase 2 的 Chunk 数据，利用大模型（Teacher Model）自动合成高质量的 Document-Grounded 问答对。
+
+1. **状态检查与断点续传**：
+   - 读取 `chunks.jsonl` 获取全量任务。
+   - 分别读取 `qa_pairs.jsonl`（成功队列）和 `error_chunks.jsonl`（死信队列），收集已处理的 `chunk_id`。
+   - 过滤得出 `pending_chunks`，实现精准的断点续传。
+2. **异步并发调度**：
+   - 使用 `asyncio.Semaphore` 设定并发锁（如 `MAX_CONCURRENCY = 64`），在不触发 API 429 限制的前提下榨干网络 I/O 吞吐量。
+   - 结合 `tqdm.asyncio` 实时监控并发进度。
+3. **强约束生成 (Structured Output)​**：
+   - LLM 扮演 MobiCom/SIGCOMM 顶级审稿人。
+   - 强制采用 Pydantic 定义的 Schema（包含 `type`, `difficulty`, `chain_of_reasoning`, `question`, `answer`, `reference_quote`）。
+   - 通过 LangChain 的 `with_structured_output` 强制模型输出合法的 JSON 格式，并自动处理 LaTeX 转义。
+4. **实时落盘与容错隔离**：
+   - 采用追加模式 (`'a'`) 和 `flush()` 实时写入硬盘。
+   - 遇到毫无价值的 Chunk（返回空列表），依然记录其 ID 以防重复处理。
+   - 遇到爆 Token 或死循环的“毒数据”，将其隔离至死信队列，保证主流水线 100% 跑通。

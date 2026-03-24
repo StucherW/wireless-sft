@@ -17,6 +17,7 @@ data/parsed/*/
 data/chunks/
 data/synthetic/
 data/cleaned/
+data/qa_generation/
 
 # 忽略模型缓存与输出
 .cache/
@@ -27,3 +28,4 @@ outputs/
 
 CLAUDE.md
 mulu.md
+src/qa_generation/test_connection.py

@@ -90,7 +90,7 @@
 ## Phase 2：上下文感知的学术语义分块（Context-Aware Chunking）
 
 **目标**：将 Markdown 转换为结构化 Chunk，在过滤无效内容的同时，最大限度保护长文本中的数学推导逻辑和上下文完整性。
-**当前状态：进行中**
+**当前状态：✅ 已完成并验证**
 
 ### Sub-task 2.1：智能边界识别与过滤
 - [√] 显式与隐式标题识别：支持 Markdown 标准标题（`##`）以及学术论文常见的加粗次级标题（如 `**A. System Model**`）。
@@ -110,14 +110,17 @@
 ## 🚧 Phase 3：数据合成引擎（QA Generation）
 
 **目标**：从 Chunk 自动合成高质量问答对
+**当前状态：✅ 已完成并验证**
 
 ### Sub-task 3.1：Prompt 设计
-- [ ] 设计无线感知领域强约束 Prompt
-- [ ] 强制基于原文公式与推理
+- [√] 设计无线感知领域强约束 Prompt（MobiCom/SIGCOMM 审稿人视角）。
+- [√] 强制引入 Chain of Reasoning 与难度分级（Difficulty）。
+- [√] 强制基于原文公式与推理提取，设定数量上限与长度约束防死循环。
 
 ### Sub-task 3.2：批量 QA 生成
-- [ ] 异步并发调用 LLM API
-- [ ] 初步生成 QA 数据集
+- [√] 采用 Pydantic + Structured Output 强制 JSON 格式化与 LaTeX 保护。
+- [√] 实现异步并发调用（Asyncio + Semaphore）。
+- [√] 实现完善的断点续传与死信队列（Dead Letter Queue）机制，成功完成全量数据转化。
 
 ---
 

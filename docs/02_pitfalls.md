@@ -30,4 +30,15 @@
 * **现象**：某些核心章节（如 Methodology）异常庞大，发现 MinerU 将其次级标题解析成了加粗文本（如 `**A. CSI Preprocessing**`），导致未能触发切分。
 * **对策**：在 `extract_header` 函数中增加隐式学术标题的正则兜底匹配（`PATTERN_IMPLICIT_HEADER`），专门抢救带有序号前缀的加粗文本，将其恢复为切分锚点。
 
+## 6. 结构化输出导致 Token 爆炸 (Max Tokens Limit Reached)
+* **现象**：极个别 Chunk 在处理时报错 `Could not parse response content as the length limit was reached`，消耗了高达 8192 个 Token。
+* **根因**：大模型在处理结构化输出（JSON）时，遇到包含极其复杂的 LaTeX 矩阵或破损伪代码的文本，其底层注意力机制崩溃，陷入了无限重复生成推导步骤的死循环，直到撞穿 Token 上限。
+* **对策**：
+  1. 在 Prompt 中增加硬性约束：`Generate a MAXIMUM of 3 to 5 QA pairs` 和 `Keep chain_of_reasoning strictly under 150 words`。
+  2. 在工程上建立“死信队列（Dead Letter Queue）”，将彻底失败的 Chunk 写入 `error_chunks.jsonl`，防止程序卡死在毒数据上。
+
+## 7. 漏记空数据导致无限重试 (Infinite Retries on Empty Results)
+* **现象**：重启脚本时，发现有几十个 Chunk 一直处于“待处理”状态，每次都被重新跑一遍。
+* **根因**：Prompt 规定遇到无价值内容返回空列表 `[]`。原代码逻辑为 `if len(qa_pairs) > 0` 才写入日志。这导致大模型正确识别出的“废话 Chunk”没有被记录在 `processed_ids` 中，下次启动时被误认为未处理。
+* **对策**：状态追踪必须基于“请求是否成功”，而不是“数据是否大于零”。修改逻辑为：只要没有抛出 Exception，即使生成的 QA 列表为空，也要写入成功日志，证明该 Chunk 已被成功“超度”。
 
